@@ -20,9 +20,9 @@
 </template>
 
 <script setup>
-  import jobsData from "@/data/jobs.json";
-  import { ref } from "vue";
+  import { onMounted, ref } from "vue";
   import JobListing from "./JobListing.vue";
+  import axios from 'axios';
 
   defineProps({
     limit: Number,
@@ -32,6 +32,16 @@
     }
   });
 
-  const jobs = ref(jobsData);
+  const jobs = ref([]);
+
+  onMounted(async () => {
+    try {
+      const response = await axios.get("http://localhost:9000/data");
+      console.log(response);
+      jobs.value = response.data;
+    } catch (error) {
+      console.error("Error while getting data. Details", error);
+    };
+  });
 
 </script>
