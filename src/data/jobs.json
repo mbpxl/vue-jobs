@@ -83,6 +83,20 @@
         "contactEmail": "contact@ipsumlorem.com",
         "contactPhone": "555-555-5555"
       }
+    },
+    {
+      "id": "1268",
+      "type": "Full-Time",
+      "title": "Junior Vue Developer",
+      "description": "Work hard yeah",
+      "salary": "Over $200K",
+      "location": "Samara, RU",
+      "company": {
+        "name": "SamaraSmart+",
+        "description": "Software for web",
+        "contactEmail": "dawd@asdasd",
+        "contactPhone": "88005553535"
+      }
     }
   ]
 }
