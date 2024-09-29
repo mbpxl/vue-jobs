@@ -3,7 +3,7 @@
     <div class="container m-auto max-w-2xl py-24">
       <div class="bg-white px-6 py-8 mb-4 shadow-md rounded-md border m-4 md:m-0">
         <form @submit.prevent="handleSubmit">
-          <h2 class="text-3xl text-center font-semibold mb-6">Add Job</h2>
+          <h2 class="text-3xl text-center font-semibold mb-6">Edit Job</h2>
 
           <div class="mb-4">
             <label for="type" class="block text-gray-700 font-bold mb-2">Job Type</label>
@@ -17,16 +17,16 @@
 
           <div class="mb-4">
             <label class="block text-gray-700 font-bold mb-2">Job Listing Name</label>
-            <input v-model="form.title" type="text" id="name" name="name" class="border rounded w-full py-2 px-3 mb-2" placeholder="eg. Beautiful Apartment In Miami" required />
+            <input type="text" v-model="form.title" id="name" name="name" class="border rounded w-full py-2 px-3 mb-2" placeholder="eg. Beautiful Apartment In Miami" required />
           </div>
           <div class="mb-4">
             <label for="description" class="block text-gray-700 font-bold mb-2">Description</label>
-            <textarea v-model="form.description" id="description" name="description" class="border rounded w-full py-2 px-3" rows="4" placeholder="Add any job duties, expectations, requirements, etc"></textarea>
+            <textarea id="description" v-model="form.description" name="description" class="border rounded w-full py-2 px-3" rows="4" placeholder="Add any job duties, expectations, requirements, etc"></textarea>
           </div>
 
           <div class="mb-4">
             <label for="type" class="block text-gray-700 font-bold mb-2">Salary</label>
-            <select v-model="form.salary" id="salary" name="salary" class="border rounded w-full py-2 px-3" required>
+            <select id="salary" v-model="form.salary" name="salary" class="border rounded w-full py-2 px-3" required>
               <option value="Under $50K">under $50K</option>
               <option value="$50K - $60K">$50 - $60K</option>
               <option value="$60K - $70K">$60 - $70K</option>
@@ -42,36 +42,34 @@
           </div>
 
           <div class="mb-4">
-            <label class="block text-gray-700 font-bold mb-2">
-              Location
-            </label>
-            <input v-model="form.location" type="text" id="location" name="location" class="border rounded w-full py-2 px-3 mb-2" placeholder="Company Location" required />
+            <label class="block text-gray-700 font-bold mb-2"> Location </label>
+            <input type="text" v-model="form.location" id="location" name="location" class="border rounded w-full py-2 px-3 mb-2" placeholder="Company Location" required />
           </div>
 
           <h3 class="text-2xl mb-5">Company Info</h3>
 
           <div class="mb-4">
             <label for="company" class="block text-gray-700 font-bold mb-2">Company Name</label>
-            <input v-model="form.company.name" type="text" id="company" name="company" class="border rounded w-full py-2 px-3" placeholder="Company Name" />
+            <input type="text" v-model="form.company.name" id="company" name="company" class="border rounded w-full py-2 px-3" placeholder="Company Name" />
           </div>
 
           <div class="mb-4">
             <label for="company_description" class="block text-gray-700 font-bold mb-2">Company Description</label>
-            <textarea v-model="form.company.description" id="company_description" name="company_description" class="border rounded w-full py-2 px-3" rows="4" placeholder="What does your company do?"></textarea>
+            <textarea id="company_description" v-model="form.company.description" name="company_description" class="border rounded w-full py-2 px-3" rows="4" placeholder="What does your company do?"></textarea>
           </div>
 
           <div class="mb-4">
             <label for="contact_email" class="block text-gray-700 font-bold mb-2">Contact Email</label>
-            <input v-model="form.company.contactEmail" type="email" id="contact_email" name="contact_email" class="border rounded w-full py-2 px-3" placeholder="Email address for applicants" required />
+            <input type="email" v-model="form.company.contactEmail" id="contact_email" name="contact_email" class="border rounded w-full py-2 px-3" placeholder="Email address for applicants" required />
           </div>
           <div class="mb-4">
             <label for="contact_phone" class="block text-gray-700 font-bold mb-2">Contact Phone</label>
-            <input v-model="form.company.contactPhone" type="tel" id="contact_phone" name="contact_phone" class="border rounded w-full py-2 px-3" placeholder="Optional phone for applicants" />
+            <input type="tel" v-model="form.company.contactPhone" id="contact_phone" name="contact_phone" class="border rounded w-full py-2 px-3" placeholder="Optional phone for applicants" />
           </div>
 
           <div>
             <button class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline" type="submit">
-              Add Job
+              Update Job
             </button>
           </div>
         </form>
@@ -81,10 +79,15 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
-import axios from 'axios';
 import router from '@/router';
+import { reactive, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import { useToast } from 'vue-toastification';
+import axios from 'axios';
+
+const route = useRoute();
+
+const jobId = route.params.id;
 
 const form = reactive({
   type: 'Full-Time',
@@ -100,15 +103,20 @@ const form = reactive({
   },
 });
 
+const state = reactive({
+  job: {},
+  isLoading: true,
+});
+
 const toast = useToast();
 
 const handleSubmit = async () => {
-  const newJob = {
-    type: form.type,
+  const updatedJob = {
     title: form.title,
+    type: form.type,
+    location: form.location,
     description: form.description,
     salary: form.salary,
-    location: form.location,
     company: {
       name: form.company.name,
       description: form.company.description,
@@ -118,12 +126,33 @@ const handleSubmit = async () => {
   };
 
   try {
-    const response = await axios.post("/api/data", newJob);
-    toast.success('Job Added Successfully');
+    const response = await axios.put(`/api/data/${jobId}`, updatedJob);
+    toast.success('Job Updated Successfully');
     router.push(`/jobs/${response.data.id}`);
   } catch (error) {
-    console.error("Error while posting data. Details", error);
+    console.error('Error fetching job', error);
     toast.error('Job Was Not Added');
   }
-}
+};
+
+onMounted(async () => {
+  try {
+    const response = await axios.get(`/api/data/${jobId}`);
+    state.job = response.data;
+    // Populate inputs
+    form.type = state.job.type;
+    form.title = state.job.title;
+    form.description = state.job.description;
+    form.salary = state.job.salary;
+    form.location = state.job.location;
+    form.company.name = state.job.company.name;
+    form.company.description = state.job.company.description;
+    form.company.contactEmail = state.job.company.contactEmail;
+    form.company.contactPhone = state.job.company.contactPhone;
+  } catch (error) {
+    console.error('Error fetching job', error);
+  } finally {
+    state.isLoading = false;
+  }
+});
 </script>
